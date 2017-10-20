@@ -17,7 +17,17 @@
         padding-bottom: 10px;
       }
       .playlist {
-        padding-bottom: 80px;
+        padding-bottom: 100px;
+      }
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+      #playlists-label-1 {
+        margin-bottom: 0px;
+      }
+      #playlists-label-2 {
+        margin-top: 0px;
       }
     </style>
   </head>
@@ -36,6 +46,8 @@
         <div class="middle">
           <div id="user-playlist">
           </div>
+          <h1>Map</h1>
+          <div id="map"></div>
         </div>
         <div class="bottom">
           <div id="oauth">
@@ -64,22 +76,39 @@
     </script>
 
     <script id="user-playlist-template" type="text/x-handlebars-template">
-      <h1>Playlists</h1>
+      <h1 id="playlists-label-1">Playlists</h1>
+      <h2 id="playlists-label-2">(collaborative and public)</h2>
       <div class="media">
           {{#each items}}
+          {{#if public}}
             <div class="playlist">
               <div class="pull-left">
-                <a href="{{external_urls.spotify}}"><img class="media-object" width="150" src="{{# if images.0.url }}{{images.0.url}}{{else}}https://d30y9cdsu7xlg0.cloudfront.net/png/45447-200.png{{/if}}" /></a>
+                <a href="{{external_urls.spotify}}"><img class="media-object" width="150" src="{{# if images.0.url }}{{images.0.url}}{{else}}https://d30y9cdsu7xlg0.cloudfront.net/png/94446-200.png{{/if}}" /></a>
               </div>
               <div class="media-body">
                 <dl class="dl-horizontal">
                   <dt>Display name</dt><dd><strong>{{name}}</strong></dd>
                   <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
                   <dt>Collaborative?</dt><dd>{{#if collaborative}} yes {{else}} no{{/if}}</dd>
-                  <dt>Public?</dt><dd>{{#if public}} yes {{else}} no{{/if}}</dd>
                 </dl>
               </div>
             </div>
+          {{else}}
+            {{#if collaborative}}
+              <div class="playlist">
+                <div class="pull-left">
+                  <a href="{{external_urls.spotify}}"><img class="media-object" width="150" src="{{# if images.0.url }}{{images.0.url}}{{else}}https://d30y9cdsu7xlg0.cloudfront.net/png/94446-200.png{{/if}}" /></a>
+                </div>
+                <div class="media-body">
+                  <dl class="dl-horizontal">
+                    <dt>Display name</dt><dd><strong>{{name}}</strong></dd>
+                    <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+                    <dt>Collaborative?</dt><dd>{{#if collaborative}} yes {{else}} no{{/if}}</dd>
+                  </dl>
+                </div>
+              </div>
+            {{/if}}
+          {{/if}}
           {{/each}}
       </div>
     </script>
@@ -189,6 +218,46 @@
         }
       })();
     </script>
+    <script>
+            var map, infoWindow;
+            function initMap() {
+              var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+              });
+              infoWindow = new google.maps.InfoWindow;
+
+              // Try HTML5 geolocation.
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                  var pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                  };
+
+                  infoWindow.setPosition(pos);
+                  infoWindow.setContent('Location found.');
+                  infoWindow.open(map);
+                  map.setCenter(pos);
+                }, function() {
+                  handleLocationError(true, infoWindow, map.getCenter());
+                });
+              } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+              }
+            }
+
+            function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+              infoWindow.setPosition(pos);
+              infoWindow.setContent(browserHasGeolocation ?
+                                    'Error: The Geolocation service failed.' :
+                                    'Error: Your browser doesn\'t support geolocation.');
+              infoWindow.open(map);
+            }
+          </script>
+          <script async defer
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEzKm7teVuxQcdIwp7f2s26-iY2toRT04&callback=initMap">
+          </script>
   </body>
 </html>
 
